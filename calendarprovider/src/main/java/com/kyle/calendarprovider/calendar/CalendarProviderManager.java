@@ -189,6 +189,119 @@ public class CalendarProviderManager {
         return deleteCount;
     }
 
+    // -- 创建特定名称的账户。比如某个 app 创建的
+
+
+    private static long createAccount(Context context, String accountName) {
+        // 系统日历表
+        Uri uri = CalendarContract.Calendars.CONTENT_URI;
+        // 要创建的账户
+        Uri accountUri;
+
+        // 开始组装账户数据
+        ContentValues account = new ContentValues();
+        // 账户类型：本地
+        // 在添加账户时，如果账户类型不存在系统中，则可能该新增记录会被标记为脏数据而被删除
+        // 设置为ACCOUNT_TYPE_LOCAL可以保证在不存在账户类型时，该新增数据不会被删除
+        account.put(CalendarContract.Calendars.ACCOUNT_TYPE, CalendarContract.ACCOUNT_TYPE_LOCAL);
+        // 日历在表中的名称
+        account.put(CalendarContract.Calendars.NAME, accountName);
+        // 日历账户的名称
+        account.put(CalendarContract.Calendars.ACCOUNT_NAME, accountName);
+        // 账户显示的名称
+        account.put(CalendarContract.Calendars.CALENDAR_DISPLAY_NAME, accountName);
+        // 日历的颜色
+        account.put(CalendarContract.Calendars.CALENDAR_COLOR, Color.parseColor("#515bd4"));
+        // 用户对此日历的获取使用权限等级
+        account.put(CalendarContract.Calendars.CALENDAR_ACCESS_LEVEL, CalendarContract.Calendars.CAL_ACCESS_OWNER);
+        // 设置此日历可见
+        account.put(CalendarContract.Calendars.VISIBLE, 1);
+        // 日历时区
+        account.put(CalendarContract.Calendars.CALENDAR_TIME_ZONE, TimeZone.getDefault().getID());
+        // 可以修改日历时区
+        account.put(CalendarContract.Calendars.CAN_MODIFY_TIME_ZONE, 1);
+        // 同步此日历到设备上
+        account.put(CalendarContract.Calendars.SYNC_EVENTS, 1);
+        // 拥有者的账户
+        account.put(CalendarContract.Calendars.OWNER_ACCOUNT, accountName);
+        // 可以响应事件
+        account.put(CalendarContract.Calendars.CAN_ORGANIZER_RESPOND, 1);
+        // 单个事件设置的最大的提醒数
+        account.put(CalendarContract.Calendars.MAX_REMINDERS, 8);
+        // 设置允许提醒的方式
+        account.put(CalendarContract.Calendars.ALLOWED_REMINDERS, "0,1,2,3,4");
+        // 设置日历支持的可用性类型
+        account.put(CalendarContract.Calendars.ALLOWED_AVAILABILITY, "0,1,2");
+        // 设置日历允许的出席者类型
+        account.put(CalendarContract.Calendars.ALLOWED_ATTENDEE_TYPES, "0,1,2");
+
+        /*
+            TIP: 修改或添加ACCOUNT_NAME只能由SYNC_ADAPTER调用
+            对uri设置CalendarContract.CALLER_IS_SYNCADAPTER为true,即标记当前操作为SYNC_ADAPTER操作
+            在设置CalendarContract.CALLER_IS_SYNCADAPTER为true时,必须带上参数ACCOUNT_NAME和ACCOUNT_TYPE(任意)
+         */
+        uri = uri.buildUpon()
+                .appendQueryParameter(CalendarContract.CALLER_IS_SYNCADAPTER, "true")
+                .appendQueryParameter(CalendarContract.Calendars.ACCOUNT_NAME, accountName)
+                .appendQueryParameter(CalendarContract.Calendars.ACCOUNT_TYPE, CalendarContract.ACCOUNT_TYPE_LOCAL)
+                .build();
+
+        try {
+            accountUri = context.getContentResolver().insert(uri, account);
+            return accountUri == null ? -1 : ContentUris.parseId(accountUri);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+
+    private static int deleteAccount(Context context, String accountName) {
+        int deleteCount;
+        Uri uri = CalendarContract.Calendars.CONTENT_URI;
+        String selection = "((" + CalendarContract.Calendars.ACCOUNT_NAME + " = ?) AND ("
+                + CalendarContract.Calendars.ACCOUNT_TYPE + " = ?))";
+
+        String[] selectionArgs = new String[]{accountName, CalendarContract.ACCOUNT_TYPE_LOCAL};
+
+        deleteCount = context.getContentResolver().delete(uri, selection, selectionArgs);
+        return deleteCount;
+    }
+
+    /**
+     * 检查是否存在现有账户，存在则返回账户id，否则返回-1
+     */
+    private static int checkAccountByName(Context context, String accountName) {
+        Uri contentUri = CalendarContract.Calendars.CONTENT_URI;
+        String selection = "((" + CalendarContract.Calendars.ACCOUNT_NAME + " = ?) AND ("
+                + CalendarContract.Calendars.ACCOUNT_TYPE + " = ?))";
+        String[] selectionArgs = new String[]{accountName, CalendarContract.ACCOUNT_TYPE_LOCAL};
+
+        Cursor userCursor = null;
+        try {
+            userCursor = context.getContentResolver().query(contentUri, null, selection, selectionArgs, null);
+            if (userCursor == null) { //查询返回空值
+                return -1;
+            }
+            int count = userCursor.getCount();
+            if (count > 0) { //存在现有账户，取第一个账户的id返回
+                userCursor.moveToFirst();
+                return userCursor.getInt(userCursor.getColumnIndex(CalendarContract.Calendars._ID));
+            } else {
+                return -1;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (userCursor != null) {
+                userCursor.close();
+            }
+        }
+        return -1;
+    }
+
+
+
 
     // ------------------------------- 添加日历事件 -----------------------------------
 
