@@ -3,46 +3,41 @@ package com.kyle.calendarprovider;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.kyle.calendarprovider.calendar.CalendarEvent;
 import com.kyle.calendarprovider.calendar.CalendarProviderManager;
 
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity {
 
-    @BindView(R.id.btn_main_add)
-    Button btnMainAdd;
-    @BindView(R.id.btn_main_delete)
-    Button btnMainDelete;
-    @BindView(R.id.btn_main_update)
-    Button btnMainUpdate;
-    @BindView(R.id.btn_main_query)
-    Button btnMainQuery;
-    @BindView(R.id.tv_event)
-    TextView tvEvent;
-    @BindView(R.id.btn_edit)
-    Button btnEdit;
-    @BindView(R.id.btn_search)
-    Button btnSearch;
+    private Button btnMainAdd;
+    private Button btnMainDelete;
+    private Button btnMainUpdate;
+    private Button btnMainQuery;
+    private TextView tvEvent;
+    private Button btnEdit;
+    private Button btnSearch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
-
+        
+        // 初始化视图
+        initViews();
+        // 设置点击事件
+        setupClickListeners();
 
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
@@ -52,17 +47,37 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @OnClick({R.id.btn_main_add, R.id.btn_main_delete, R.id.btn_edit,
-            R.id.btn_main_update, R.id.btn_main_query, R.id.btn_search})
-    public void onViewClicked(View view) {
+    private void initViews() {
+        btnMainAdd = findViewById(R.id.btn_main_add);
+        btnMainDelete = findViewById(R.id.btn_main_delete);
+        btnMainUpdate = findViewById(R.id.btn_main_update);
+        btnMainQuery = findViewById(R.id.btn_main_query);
+        tvEvent = findViewById(R.id.tv_event);
+        btnEdit = findViewById(R.id.btn_edit);
+        btnSearch = findViewById(R.id.btn_search);
+    }
+    
+    private void setupClickListeners() {
+        View.OnClickListener clickListener = this::onViewClicked;
+        btnMainAdd.setOnClickListener(clickListener);
+        btnMainDelete.setOnClickListener(clickListener);
+        btnMainUpdate.setOnClickListener(clickListener);
+        btnMainQuery.setOnClickListener(clickListener);
+        btnEdit.setOnClickListener(clickListener);
+        btnSearch.setOnClickListener(clickListener);
+    }
+    
+    private void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.btn_main_add:
+                Long start =  System.currentTimeMillis();
+                Log.d("MainActivity","start ="+start);
                 CalendarEvent calendarEvent = new CalendarEvent(
-                        "马上吃饭",
+                        "马上吃饭yyyyy",
                         "吃好吃的",
                         "南信院二食堂",
-                        System.currentTimeMillis(),
-                        System.currentTimeMillis() + 60000,
+                        1750464000L *1000,
+                        1750464000L *1000+60000,
                         0, null
                 );
 

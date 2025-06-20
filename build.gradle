@@ -2,12 +2,14 @@
 
 buildscript {
     repositories {
-        google()
-        jcenter()
-        
+        maven { url "https://maven.aliyun.com/repository/public/" }
+        maven { url "https://maven.aliyun.com/repository/central" }
+        maven { url 'https://maven.aliyun.com/repository/google' }
+// 这个应该是能可以下载到room相关的东西
+        maven { url 'https://mirrors.tencent.com/nexus/repository/maven-public/' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.0'
+        classpath 'com.android.tools.build:gradle:7.2.2'
         
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -16,9 +18,12 @@ buildscript {
 
 allprojects {
     repositories {
-        google()
-        jcenter()
-        
+        maven { url "https://maven.aliyun.com/repository/public/" }
+        maven { url "https://maven.aliyun.com/repository/central" }
+        maven { url 'https://maven.aliyun.com/repository/google' }
+// 这个应该是能可以下载到room相关的东西
+        maven { url 'https://mirrors.tencent.com/nexus/repository/maven-public/' }
+
     }
 }
 

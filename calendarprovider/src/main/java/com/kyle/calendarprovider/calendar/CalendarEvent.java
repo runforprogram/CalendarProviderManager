@@ -1,6 +1,6 @@
 package com.kyle.calendarprovider.calendar;
 
-import android.support.annotation.NonNull;
+
 
 import java.util.List;
 
@@ -273,7 +273,6 @@ public class CalendarEvent {
         this.reminders = reminders;
     }
 
-    @NonNull
     @Override
     public String toString() {
         return "CalendarEvent{" +
